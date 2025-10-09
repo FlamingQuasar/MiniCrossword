@@ -1,0 +1,2 @@
+# MiniCrossword
+Crossword game algorithm
