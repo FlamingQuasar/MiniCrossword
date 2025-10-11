@@ -26,11 +26,13 @@ class Crossword{
      * @param {words} общий список слов-вариантов
      * @param {genLimit} максимальное число сгенерированных вариантов
      */
-    constructor({rows,cols,words,genLimit=100}){
+    constructor({rows,cols,words,genLimit=100,showLog=false}){
         this.rows = rows;
         this.cols = cols;
         this.words = [];
         this.genLimit = genLimit;
+        this.showLog = showLog;
+
         this.matrix = [];
         this.cost = 0; // "ценность" кроссворда выше, если больше пересечений слов
         // ведем счетчик букв в словах которые хотим разместить
@@ -50,10 +52,29 @@ class Crossword{
                     () => new Array(...this.matrix[index++]));
         return arr;
     }
+    shuffleWords(){ //Использует случайные индексы для обмена элементами массива.
+        for (let i = 0; i < this.words.length; i++) { 
+            let index = Math.floor(Math.random() * this.words.length); 
+            const temp = this.words[i];
+            this.words[i] = this.words[index];
+            this.words[index] = temp;
+        }
+    }
+    startGeneration(){
+        while(this.genLimit>0){
+            this.genLimit--;
+            let wordIndex = 0;
+            this.backtrack(wordIndex);
+            if(this.showLog){
+                console.log(this.getMatrix());
+            }
+            this.shuffleWords(); 
+        }
+    }
     backtrack(wordIndex){
         if (wordIndex === this.words.length) {
             return true;
-        }
+        }        
         const word = this.words[wordIndex];
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
@@ -62,14 +83,14 @@ class Crossword{
                 if (randomOrientationChoose>0.5 
                     && this.canPlaceWordHorizontal(word, row, col)
                 ){
-                    this.placeWordHorizontal(word, row, col);
+                    let previous = this.placeWordHorizontalReturnPrev(word, row, col);
                     if (this.usedLettersCount>=this.totalLettersCount ||
                         this.backtrack(wordIndex + 1)
                     ){
                         return true;
                     }
                     // Убрать слово если из-за него не полезет следующее
-                    //this.placeWordHorizontal(Array(word.length).fill('0'), row, col); 
+                    this.placeWordHorizontalReturnPrev(previous, row, col); 
                 } 
                 // Попробовать разместить слово вертикально
                 else if(randomOrientationChoose<=0.5 &&
@@ -84,7 +105,7 @@ class Crossword{
                     //this.placeWordVertical(Array(word.length).fill('0'), row, col); 
                 }
             }
-        }
+        }       
         return false;
     }
     canPlaceWordHorizontal(word, row, col){
@@ -98,12 +119,15 @@ class Crossword{
         }
         return true;
     }
-    placeWordHorizontal(word, row, col){
+    placeWordHorizontalReturnPrev(word, row, col){
+        let prevoiousWord = "";
         for(let i=0; i< word.length; i++){
+            prevoiousWord+=this.matrix[row][col + i];
             if(this.matrix[row][col + i] != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
             this.matrix[row][col + i] = word[i];
         }
+        return prevoiousWord;
     }
     canPlaceWordVertical(word, row, col) {
         if (row + word.length > this.rows) 
@@ -142,7 +166,7 @@ class Crossword{
     }*/
 
 // Пример использования
-const words = ["cat", "bar", "bra", "art", "bat", "rat", "hat", "mat", "cap", "med"];
+const words = ["cat", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom"];
 const size = { rows: 5, cols: 5 };
 const emptyCells = 5;
 
@@ -150,8 +174,10 @@ const cr = new Crossword({
     rows:size.rows, 
     cols:size.cols, 
     words:words, 
-    empty:emptyCells
+    empty:emptyCells,
+    genLimit: 3,
+    showLog: true
 });
 console.log(cr.getMatrix());
-cr.backtrack(0);
-console.log(cr.getMatrix());
+cr.startGeneration();
+//console.log(cr.getMatrix());
