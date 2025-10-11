@@ -14,8 +14,12 @@ class Cell{
         this.row = row;
         this.col = col;
         this.val = val;
-        this.horizontStart = horizontStart;
+        //если horizontStart не -1, значит слово по горизонтали
+        this.horizontStart = horizontStart; 
+        //если verticalStart не -1 значит слово по вертикали
         this.verticalStart = verticalStart;
+        //буква на пересечении слов, ее больше нельзя задействовать в словах
+        this.onCross = false;
     }
 }
 class Crossword{
@@ -25,6 +29,7 @@ class Crossword{
      * @param {cols} заданное количество столбцов кроссворда
      * @param {words} общий список слов-вариантов
      * @param {genLimit} максимальное число сгенерированных вариантов
+     * @param {showLog} флаг показа console.log
      */
     constructor({rows,cols,words,genLimit=100,showLog=false}){
         this.rows = rows;
@@ -33,18 +38,29 @@ class Crossword{
         this.genLimit = genLimit;
         this.showLog = showLog;
 
-        this.matrix = [];
         this.cost = 0; // "ценность" кроссворда выше, если больше пересечений слов
         // ведем счетчик букв в словах которые хотим разместить
         this.totalLettersCount = 0;
-        this.usedLettersCount = 0;
         // Первоначальная фильтрация слов - берем только те, которые хотя бы влезут
         words.map(word => 
                 word.length <= rows && word.length <= cols?
                     (this.words.push(word), this.totalLettersCount += word.length): "");
         // Создание первоначальной пустой матрицы
-        this.matrix = Array.from({ length: this.rows }, 
-                    () => Array(this.cols).fill('0'));
+        this.createEmptyMatrix();
+    }
+    createEmptyMatrix(){
+        this.usedLettersCount = 0;
+        this.matrix = [];
+        for(let i=0; i<this.rows; i++){
+            let row = [];
+            for(let j=0; j<this.cols; j++){
+                row.push(new Cell({val:'0'}));
+            }
+            this.matrix.push(row);
+        }
+       /* this.matrix = Array.from({ length: this.rows }, 
+                    () => Array(this.cols).fill(
+                        new Cell({val:'0'})));*/
     }
     getMatrix(){
         let index = 0;
@@ -65,9 +81,21 @@ class Crossword{
             this.genLimit--;
             let wordIndex = 0;
             this.backtrack(wordIndex);
+            
             if(this.showLog){
-                console.log(this.getMatrix());
+                let fullMatrix = this.getMatrix();
+                let onlyValuesArray = [];
+                for(let i=0; i<fullMatrix.length; i++){
+                    let row = fullMatrix[i];
+                    let valuesRow = [];
+                    for(let j=0; j<row.length; j++){
+                        valuesRow.push(row[j].val);
+                    }
+                    onlyValuesArray.push(valuesRow);
+                }
+                console.log(onlyValuesArray);
             }
+            this.createEmptyMatrix();
             this.shuffleWords(); 
         }
     }
@@ -112,8 +140,8 @@ class Crossword{
         if(col + word.length > this.cols) 
             return false;
         for(let i=0; i<word.length; i++){
-            if(this.matrix[row][col+i] !== '0' &&  // проверяем чтов клетке не пусто
-               this.matrix[row][col+i] !== word[i] // либо в клетке нет той же буквы
+            if(this.matrix[row][col+i].val !== '0' &&  // проверяем чтов клетке не пусто
+               this.matrix[row][col+i].val !== word[i] // либо в клетке нет той же буквы
             )
                 return false;
         }
@@ -122,10 +150,10 @@ class Crossword{
     placeWordHorizontalReturnPrev(word, row, col){
         let prevoiousWord = "";
         for(let i=0; i< word.length; i++){
-            prevoiousWord+=this.matrix[row][col + i];
-            if(this.matrix[row][col + i] != word[i] && word[i]!=0) 
+            prevoiousWord += this.matrix[row][col + i].val;
+            if(this.matrix[row][col + i].val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
-            this.matrix[row][col + i] = word[i];
+            this.matrix[row][col + i].val = word[i];
         }
         return prevoiousWord;
     }
@@ -133,8 +161,8 @@ class Crossword{
         if (row + word.length > this.rows) 
             return false;
         for (let i = 0; i<word.length; i++) {
-            if (this.matrix[row + i][col] !== '0' &&  // проверяем что в клетке не пусто
-                this.matrix[row+i][col] !== word[i] // или нет пересечения с той же буквой
+            if (this.matrix[row + i][col].val !== '0' &&  // проверяем что в клетке не пусто
+                this.matrix[row+i][col].val !== word[i] // или нет пересечения с той же буквой
             ) 
                 return false;
         }
@@ -142,9 +170,9 @@ class Crossword{
     }
     placeWordVertical(word, row, col) {
         for (let i = 0; i<word.length; i++) {
-            if(this.matrix[row+i][col] != word[i] && word[i]!=0) 
+            if(this.matrix[row+i][col].val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
-            this.matrix[row+i][col] = word[i];
+            this.matrix[row+i][col].val = word[i];
         }
     }
 }
@@ -166,7 +194,7 @@ class Crossword{
     }*/
 
 // Пример использования
-const words = ["cat", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom"];
+const words = ["cat", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom", "old", "odd", "don", "node"];
 const size = { rows: 5, cols: 5 };
 const emptyCells = 5;
 
