@@ -246,21 +246,4 @@ class Crossword{
         }
     }*/
 
-// Пример использования
-const words = ["cat", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom", "old", "odd", "don", "node"];
-const size = { rows: 6, cols: 6 };
-const emptyCells = 5;
 
-const cr = new Crossword({
-    rows:size.rows, 
-    cols:size.cols, 
-    words:words, 
-    empty:emptyCells,
-    genLimit: 3,
-    showLog: true
-});
-
-// Покажи пустую матрицу
-// Добавить для лога displayMatrix()
-console.log(cr.getMatrix());
-cr.startGeneration();
