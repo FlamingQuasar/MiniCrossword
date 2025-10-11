@@ -1,6 +1,7 @@
 ﻿class Word{
 
 }
+
 class Cell{
     /**
      * Создание Ячейки с буквой слова (по горизонтали, вертикали, или пустотой)
@@ -22,6 +23,7 @@ class Cell{
         this.onCross = false;
     }
 }
+
 class Crossword{
     /**
      * Передаем размеры матрицы и все варианты слов
@@ -38,6 +40,10 @@ class Crossword{
         this.genLimit = genLimit;
         this.showLog = showLog;
 
+        // если используем useCrossingRule то нельзя делать слова внутри слов
+        this.useCrossingRule = true;
+        this.usedWords = [];
+
         this.cost = 0; // "ценность" кроссворда выше, если больше пересечений слов
         // ведем счетчик букв в словах которые хотим разместить
         this.totalLettersCount = 0;
@@ -48,6 +54,7 @@ class Crossword{
         // Создание первоначальной пустой матрицы
         this.createEmptyMatrix();
     }
+
     createEmptyMatrix(){
         this.usedLettersCount = 0;
         this.matrix = [];
@@ -62,12 +69,13 @@ class Crossword{
                     () => Array(this.cols).fill(
                         new Cell({val:'0'})));*/
     }
+
     getMatrix(){
         let index = 0;
-        let arr = Array.from({ length: this.rows }, 
+        return Array.from({ length: this.rows }, 
                     () => new Array(...this.matrix[index++]));
-        return arr;
     }
+
     shuffleWords(){ //Использует случайные индексы для обмена элементами массива.
         for (let i = 0; i < this.words.length; i++) { 
             let index = Math.floor(Math.random() * this.words.length); 
@@ -76,6 +84,7 @@ class Crossword{
             this.words[index] = temp;
         }
     }
+
     startGeneration(){
         while(this.genLimit>0){
             this.genLimit--;
@@ -94,16 +103,25 @@ class Crossword{
                     onlyValuesArray.push(valuesRow);
                 }
                 console.log(onlyValuesArray);
+                console.log("words:"+this.usedWords);
             }
+
+            this.usedWords = [];
             this.createEmptyMatrix();
             this.shuffleWords(); 
         }
     }
+
     backtrack(wordIndex){
-        if (wordIndex === this.words.length) {
+        while(this.usedWords.indexOf(this.words[wordIndex]) >= 0)
+        {
+            wordIndex++;
+        }
+        let word = this.words[wordIndex];
+        if (wordIndex >= this.words.length || this.usedWords.indexOf(word)>=0) {
             return true;
-        }        
-        const word = this.words[wordIndex];
+        }
+
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 let randomOrientationChoose = Math.random();
@@ -111,31 +129,41 @@ class Crossword{
                 if (randomOrientationChoose>0.5 
                     && this.canPlaceWordHorizontal(word, row, col)
                 ){
-                    let previous = this.placeWordHorizontalReturnPrev(word, row, col);
-                    if (this.usedLettersCount>=this.totalLettersCount ||
-                        this.backtrack(wordIndex + 1)
-                    ){
-                        return true;
-                    }
+                    if(this.usedWords.indexOf(word)<0){
+                        let previous = this.placeWordHorizontalReturnPrev(word, row, col);
+                        this.usedWords.push(word);
+                        if (this.usedLettersCount>=this.totalLettersCount ||
+                            this.backtrack(wordIndex + 1)
+                        ){         
+                            return true;
+                        }
                     // Убрать слово если из-за него не полезет следующее
-                    this.placeWordHorizontalReturnPrev(previous, row, col); 
+                    // if(Math.random()>0.5)
+                    //    this.placeWordHorizontalReturnPrev(previous, row, col);
+                    } 
                 } 
                 // Попробовать разместить слово вертикально
                 else if(randomOrientationChoose<=0.5 &&
                     this.canPlaceWordVertical(word, row, col)
                 ){
-                    this.placeWordVertical(word,row,col);
-                    if (this.usedLettersCount>=this.totalLettersCount ||
-                        this.backtrack(wordIndex + 1)
-                    ){
-                        return true;
+                    if(this.usedWords.indexOf(word)<0){
+                        let previous = this.placeWordVerticalReturnPrev(word,row,col);
+                        this.usedWords.push(word);
+                        if (this.usedLettersCount>=this.totalLettersCount ||
+                            this.backtrack(wordIndex + 1)
+                        ){
+                            return true;
+                        }
+                       // if(Math.random()>0.5) 
+                    ///    this.placeWordVerticalReturnPrev(previous, row, col); 
                     }// Убрать слово если из-за него не полезет следующее
-                    //this.placeWordVertical(Array(word.length).fill('0'), row, col); 
+                    
                 }
             }
         }       
         return false;
     }
+
     canPlaceWordHorizontal(word, row, col){
         if(col + word.length > this.cols) 
             return false;
@@ -147,16 +175,21 @@ class Crossword{
         }
         return true;
     }
+
+    // Разместить слово по горизонтали и вернуть значения ячеек до выставления слова
     placeWordHorizontalReturnPrev(word, row, col){
-        let prevoiousWord = "";
+        let prevoiousCellValues = "";
         for(let i=0; i< word.length; i++){
-            prevoiousWord += this.matrix[row][col + i].val;
+            prevoiousCellValues += this.matrix[row][col + i].val;
             if(this.matrix[row][col + i].val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
             this.matrix[row][col + i].val = word[i];
+            this.matrix[row][col + i].horizontStart = i;
         }
-        return prevoiousWord;
+       // console.log(prevoiousCellValues);
+        return prevoiousCellValues;
     }
+
     canPlaceWordVertical(word, row, col) {
         if (row + word.length > this.rows) 
             return false;
@@ -168,12 +201,18 @@ class Crossword{
         }
         return true;
     }
-    placeWordVertical(word, row, col) {
+
+    // Разместить слово по вертикали и вернуть значения ячеек до выставления слова
+    placeWordVerticalReturnPrev(word, row, col) {
+        let prevoiousCellValues = "";
         for (let i = 0; i<word.length; i++) {
+            prevoiousCellValues += this.matrix[row+i][col].val;
             if(this.matrix[row+i][col].val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
             this.matrix[row+i][col].val = word[i];
+            this.matrix[row][col + i].verticalStart = i;
         }
+        return prevoiousCellValues;
     }
 }
 
@@ -206,6 +245,6 @@ const cr = new Crossword({
     genLimit: 3,
     showLog: true
 });
+
 console.log(cr.getMatrix());
 cr.startGeneration();
-//console.log(cr.getMatrix());
