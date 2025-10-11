@@ -1,3 +1,7 @@
+.ui-cw-hint{
+    background-color: aquamarine;
+    padding: 4px;
+}
 .ui-cw-iteration{
     border-bottom: 1px solid black;
     display: flex;
@@ -25,7 +29,9 @@
     border:1px solid white;
 }
 .ui-cw-cell:hover:not(.ui-cw-cell-empty){
-    background-color:rgb(226, 152, 78);
+    background-color:rgb(255, 198, 141);
+    cursor: pointer;
+    user-select: none;
 }
 .ui-cw-cell-counter-vert,
 .ui-cw-cell-counter-hor{
@@ -38,4 +44,10 @@
 }
 .ui-cw-cell-counter-hor{
     margin-top: -10px;
+}
+.ui-cw-questions{
+    display: flex;
+}
+.ui-cw-questions>div{
+    padding-left:10px;
 }

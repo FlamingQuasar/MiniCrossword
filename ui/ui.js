@@ -1,5 +1,15 @@
+﻿
+//TODO:
+//Клик по ячейкам - форма ввода слова
+//кнопочка проверки у каждого кроссворда, работает на 3 попытки, верные окрашивает зеленой рамкой 
+//кнопка завершения у каждого кроссворда
+
+//предустановка генерации - открыть файл слов(+ слова по умолчанию, или + только короткие), 
+// ширина, высота, минимум пробелов
+//доработать принудительные пробелы 
+
 class CrossWordUI{
-    constructor({container, crossword, questions}){
+    constructor({container, crossword}){
         this.crossword = crossword;
         this._dom = document.createElement("div");
         this._dom.setAttribute("class","ui-crossword");
@@ -14,7 +24,10 @@ class CrossWordUI{
     }
 
     render(){
-        console.log(this.crossword.generations);
+        let _hintText = document.createElement("div");
+        _hintText.classList.add("ui-cw-hint");
+        _hintText.innerHTML = `Click to the word to type it! Or click <b>"Show"</b> button`;
+        this._dom.append(_hintText);
         this.crossword.generations.forEach(gen => {
             let _iteration = document.createElement("div"),
                 _matrixWrap = document.createElement("div"),
@@ -41,7 +54,7 @@ class CrossWordUI{
 
             _iteration.append(_matrixWrap, _questions);
             this._dom.append(_iteration);
-            
+            this.renderQuestions(gen, _questions);
             this.verticalCounter = 1;
             this.horizontalCounter = 1;
         });
@@ -85,6 +98,35 @@ class CrossWordUI{
                 element.style.borderLeft = "1px solid grey";            
             if(!rightCell || (rightCell.horizontStart == 0 || rightCell.horizontStart != cell.horizontStart+1))
                 element.style.borderRight = "1px solid grey";
+        }
+    }
+
+    renderQuestions(generation, questionsElement){
+        if(generation.usedWordsVertical.length){
+            let _verticalQuestionsElement = document.createElement("div");
+            _verticalQuestionsElement.innerText = "Vertical words:";
+            let _ol = document.createElement("ol");
+            _verticalQuestionsElement.append(_ol);
+
+            generation.usedWordsVertical.forEach(word=>{
+                let _li = document.createElement("li");
+                _li.innerText = word;
+                _ol.append(_li);
+            });
+            questionsElement.append(_verticalQuestionsElement);
+        }
+        if(generation.usedWordsHorizontal.length){
+            let _horizontalQuestionsElement = document.createElement("div");
+            _horizontalQuestionsElement.innerText = "Horizontal words:";
+            let _ol = document.createElement("ol");
+            _horizontalQuestionsElement.append(_ol);
+
+            generation.usedWordsHorizontal.forEach(word=>{
+                let _li = document.createElement("li");
+                _li.innerText = word;
+                _ol.append(_li);
+            });
+            questionsElement.append(_horizontalQuestionsElement);
         }
     }
 
