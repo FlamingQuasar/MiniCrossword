@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="js/main.js"></script>
+        <script src="ui/ui.js"></script>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script>
+            let words;
+            const crossword = new Crossword({
+                rows: 5, 
+                cols: 5, 
+                words: words, 
+                empty: 5,
+                genLimit: 3,
+                showLog: true
+            });
+            const app = new CrossWordUI({
+                container : document.querySelector("#app"),
+                crossword : crossword
+            });
+        </script>
+    </body>
+</html>

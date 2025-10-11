@@ -1,6 +1,17 @@
 ﻿class Word{
+    constructor(cells){
+        this.cells = cells
+        this.checked = false;
+    }
+    checkWord(letters){
 
+    }
 }
+//TODO:
+//Сделать визуализацию кроссворда в ячейках, сначала на html css, выделение ячеек цветом
+//Обратную связь с кликами по ячейкам - работает ввод слова, отображение списка вопросов
+//кнопочка проверки кроссворда, работает на 3 попытки, верные окрашивает зеленой рамкой 
+//отображение пустых клеток серыми
 
 class Cell{
     /**
@@ -168,8 +179,9 @@ class Crossword{
         if(col + word.length > this.cols) 
             return false;
         for(let i=0; i<word.length; i++){
-            if(this.matrix[row][col+i].val !== '0' &&  // проверяем чтов клетке не пусто
-               this.matrix[row][col+i].val !== word[i] // либо в клетке нет той же буквы
+            if((this.matrix[row][col+i].val !== '0' &&  // проверяем что в клетке не пусто
+               this.matrix[row][col+i].val !== word[i]) || //  в клетке нет той же буквы
+               this.matrix[row][col+i].horizontStart != -1 //в клетке буква из уже горизонтального слова
             )
                 return false;
         }
@@ -194,10 +206,11 @@ class Crossword{
         if (row + word.length > this.rows) 
             return false;
         for (let i = 0; i<word.length; i++) {
-            if (this.matrix[row + i][col].val !== '0' &&  // проверяем что в клетке не пусто
-                this.matrix[row+i][col].val !== word[i] // или нет пересечения с той же буквой
-            ) 
-                return false;
+            if ((this.matrix[row + i][col].val !== '0' &&  // проверяем что в клетке не пусто
+                this.matrix[row+i][col].val !== word[i])  || // и нет пересечения с той же буквой
+                this.matrix[row+i][col].verticalStart != -1 //и в клетке буква уже вертикального слова
+            )
+            return false;
         }
         return true;
     }
@@ -210,10 +223,11 @@ class Crossword{
             if(this.matrix[row+i][col].val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
             this.matrix[row+i][col].val = word[i];
-            this.matrix[row][col + i].verticalStart = i;
+            this.matrix[row+i][col].verticalStart = i;
         }
         return prevoiousCellValues;
     }
+    
 }
 
 
@@ -234,7 +248,7 @@ class Crossword{
 
 // Пример использования
 const words = ["cat", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom", "old", "odd", "don", "node"];
-const size = { rows: 5, cols: 5 };
+const size = { rows: 6, cols: 6 };
 const emptyCells = 5;
 
 const cr = new Crossword({
@@ -246,5 +260,7 @@ const cr = new Crossword({
     showLog: true
 });
 
+// Покажи пустую матрицу
+// Добавить для лога displayMatrix()
 console.log(cr.getMatrix());
 cr.startGeneration();
