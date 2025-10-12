@@ -102,30 +102,25 @@ class CrossWordUI{
     }
 
     renderQuestions(generation, questionsElement){
-        if(generation.usedWordsVertical.length){
+        if(generation.usedWords.length){
             let _verticalQuestionsElement = document.createElement("div");
             _verticalQuestionsElement.innerText = "Vertical words:";
-            let _ol = document.createElement("ol");
-            _verticalQuestionsElement.append(_ol);
+            let _olVert = document.createElement("ol");
+            _verticalQuestionsElement.append(_olVert);
+             let _horizontalQuestionsElement = document.createElement("div");
+            _horizontalQuestionsElement.innerText = "Horizontal words:";
+            let _olHoriz = document.createElement("ol");
+            _horizontalQuestionsElement.append(_olHoriz);
 
-            generation.usedWordsVertical.forEach(word=>{
+            generation.usedWords.forEach(word=>{
                 let _li = document.createElement("li");
-                _li.innerText = word;
-                _ol.append(_li);
+                _li.innerText = word.text;
+                if(word.orientation == "vertical")
+                    _olVert.append(_li);
+                else 
+                    _olHoriz.append(_li);
             });
             questionsElement.append(_verticalQuestionsElement);
-        }
-        if(generation.usedWordsHorizontal.length){
-            let _horizontalQuestionsElement = document.createElement("div");
-            _horizontalQuestionsElement.innerText = "Horizontal words:";
-            let _ol = document.createElement("ol");
-            _horizontalQuestionsElement.append(_ol);
-
-            generation.usedWordsHorizontal.forEach(word=>{
-                let _li = document.createElement("li");
-                _li.innerText = word;
-                _ol.append(_li);
-            });
             questionsElement.append(_horizontalQuestionsElement);
         }
     }

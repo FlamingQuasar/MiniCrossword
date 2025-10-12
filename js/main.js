@@ -1,4 +1,13 @@
-﻿class Cell{
+﻿class Word{
+    constructor({orientation="vertical", text=""}){
+        this.orientation = orientation;
+        this.cells = [];
+        this.guesed = false;
+        this.text = text;
+    }
+}
+
+class Cell{
     /**
      * Создание Ячейки с буквой слова (по горизонтали, вертикали, или пустотой)
      * @param {row} позиция по вертикали 
@@ -11,6 +20,7 @@
         this.row = row;
         this.col = col;
         this.val = val;
+        this.answer = "";
         //если horizontStart не -1, значит слово по горизонтали
         this.horizontStart = horizontStart; 
         //если verticalStart не -1 значит слово по вертикали
@@ -38,8 +48,7 @@ class Crossword{
 
         // если используем useCrossingRule то нельзя делать слова внутри слов
         this.useCrossingRule = true;
-        this.usedWordsVertical = [];
-        this.usedWordsHorizontal = [];
+        this.usedWords = [];
 
         this.cost = 0; // "ценность" кроссворда выше, если больше пересечений слов
         // ведем счетчик букв в словах которые хотим разместить
@@ -101,31 +110,38 @@ class Crossword{
                     onlyValuesArray.push(valuesRow);
                 }
                 console.log(onlyValuesArray);
-                console.log("Horizontal words:"+this.usedWordsHorizontal);
-                console.log("Vertical words:"+this.usedWordsVertical);
+                let vertWords = "", horWords = "";
+                this.usedWords.forEach(word=>word.orientation=="vertical"?
+                                                vertWords+=word.text+",":horWords+=word.text+",");
+                console.log("Vertical words:"+vertWords);
+                console.log("Horizontal words:"+horWords);
             }
-            fullMatrix.usedWordsVertical = this.usedWordsVertical;
-            fullMatrix.usedWordsHorizontal = this.usedWordsHorizontal;
+            fullMatrix.usedWords = this.usedWords;
             this.generations.push(fullMatrix);
 
-            this.usedWordsVertical = [];
-            this.usedWordsHorizontal = [];
+            this.usedWords = [];
             this.createEmptyMatrix();
             this.shuffleWords(); 
         }
     }
 
+    findUsedWordIndex(word){
+        for(let i=0; i<this.usedWords.length; i++){
+            if(this.usedWords[i].text == word)
+                return i;
+        }
+        return -1;
+    }
+
     backtrack(wordIndex){
-        while(this.usedWordsHorizontal.indexOf(this.words[wordIndex]) >= 0
-            || this.usedWordsVertical.indexOf(this.words[wordIndex]) >= 0)
+        while(this.findUsedWordIndex(this.words[wordIndex]) >= 0)
         {
             wordIndex++;
         }
 
         let word = this.words[wordIndex];
         if (wordIndex >= this.words.length || 
-            this.usedWordsHorizontal.indexOf(word)>=0 ||
-            this.usedWordsVertical.indexOf(word)>=0) {
+            this.findUsedWordIndex(word)>=0 ) {
             return true;
         }
 
@@ -136,11 +152,8 @@ class Crossword{
                 if (randomOrientationChoose>0.5 
                     && this.canPlaceWordHorizontal(word, row, col)
                 ){
-                    if(this.usedWordsHorizontal.indexOf(word)<0 &&
-                        this.usedWordsVertical.indexOf(word)<0
-                    ){
+                    if(this.findUsedWordIndex(word)<0){
                         this.placeWordHorizontal(word, row, col);
-                        this.usedWordsHorizontal.push(word);
                         if (this.usedLettersCount>=this.totalLettersCount ||
                             this.backtrack(wordIndex + 1)
                         ){         
@@ -152,10 +165,8 @@ class Crossword{
                 else if(randomOrientationChoose<=0.5 &&
                     this.canPlaceWordVertical(word, row, col)
                 ){
-                    if(this.usedWordsHorizontal.indexOf(word)<0 &&
-                        this.usedWordsVertical.indexOf(word)<0){
+                    if(this.findUsedWordIndex(word)<0){
                         this.placeWordVertical(word,row,col);
-                        this.usedWordsVertical.push(word);
                         if (this.usedLettersCount>=this.totalLettersCount ||
                             this.backtrack(wordIndex + 1)
                         ){
@@ -184,12 +195,15 @@ class Crossword{
 
     // Разместить слово по горизонтали
     placeWordHorizontal(word, row, col){
+        let _word = new Word({orientation:"horizontal", text:word});
+        this.usedWords.push(_word);
         for(let i=0; i< word.length; i++){
             let _cell = this.matrix[row][col + i];
             if(_cell.val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
             _cell.val = word[i];
             _cell.horizontStart = i;
+            _word.cells.push(_cell);
         }
     }
 
@@ -208,12 +222,15 @@ class Crossword{
 
     // Разместить слово по вертикали и вернуть значения ячеек до выставления слова
     placeWordVertical(word, row, col) {
+        let _word = new Word({orientation:"vertical", text:word});
+        this.usedWords.push(_word);
         for (let i = 0; i<word.length; i++) {
             let _cell = this.matrix[row+i][col];
             if(_cell.val != word[i] && word[i]!=0) 
                 this.usedLettersCount++;
             _cell.val = word[i];
             _cell.verticalStart = i;
+            _word.cells.push(_cell);
         }
     }
     
