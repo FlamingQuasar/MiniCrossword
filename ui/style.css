@@ -1,3 +1,16 @@
+.ui-popup{
+    background-color:antiquewhite;
+    border: 1px solid black;
+    display: none;
+    height: 200px;
+    margin: 30px;
+    min-width: 300px;
+    position: absolute;
+    z-index:1000;
+}
+.ui-popup-active{
+    display:block;
+}
 .ui-cw-hint{
     background-color: aquamarine;
     padding: 4px;
@@ -32,6 +45,9 @@
     background-color:rgb(255, 198, 141);
     cursor: pointer;
     user-select: none;
+}
+.ui-cw-cellactive{
+    background-color:rgb(255, 198, 141);
 }
 .ui-cw-cell-counter-vert,
 .ui-cw-cell-counter-hor{

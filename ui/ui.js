@@ -8,11 +8,15 @@
 // ширина, высота, минимум пробелов
 //доработать принудительные пробелы 
 
+
 class CrossWordUI{
     constructor({container, crossword}){
         this.crossword = crossword;
         this._dom = document.createElement("div");
-        this._dom.setAttribute("class","ui-crossword");
+        this._dom.classList.add("ui-crossword");
+        this._popupWindow = document.createElement("div");
+        this._popupWindow.classList.add("ui-popup");
+        this._dom.append(this._popupWindow);
         container.append(this._dom);
         this.verticalCounter = 1;
         this.horizontalCounter = 1;
@@ -22,7 +26,44 @@ class CrossWordUI{
     init(){
         this.crossword.startGeneration();
     }
-
+    cellIsHovered(gen, row, col){
+        let cell = gen[row][col];
+        gen.usedWords.forEach(word => {
+            if(word.cells.indexOf(cell) >= 0){
+                word.cells.forEach(c => {
+                    c.el.classList.add("ui-cw-cellactive");
+                })
+            }
+        });
+    }
+    cellIsOut(gen, row, col){
+        let cell = gen[row][col];
+        gen.usedWords.forEach(word => {
+            if(word.cells.indexOf(cell) >= 0){
+                word.cells.forEach(c => {
+                    c.el.classList.remove("ui-cw-cellactive");
+                })
+            }
+        });
+    }
+    cellIsClicked(gen, row, col){
+        let cell = gen[row][col];
+        let askedWords = [];
+        gen.usedWords.forEach(word => {
+            if(word.cells.indexOf(cell) >= 0){
+                askedWords.push(word);
+            }
+        });
+        console.log(askedWords);
+        this.showQuestionAnswerPopup(askedWords);
+    }
+    showQuestionAnswerPopup(words){
+        this._popupWindow.innerHTML = "";
+        let _typingSuggestTextEl = document.createElement("div");
+        _typingSuggestTextEl.innerText = "Please, type your answer:";
+        this._popupWindow.append(_typingSuggestTextEl);
+        this._popupWindow.classList.add("ui-popup-active");
+    }
     render(){
         let _hintText = document.createElement("div");
         _hintText.classList.add("ui-cw-hint");
@@ -41,6 +82,16 @@ class CrossWordUI{
                 for(let j=0; j<gen[i].length; j++){
                     let _cell = document.createElement("div");
                     _cell.setAttribute("class","ui-cw-cell");
+                    gen[i][j].el = _cell;
+                    _cell.addEventListener("mouseover",()=>{
+                        this.cellIsHovered(gen, i, j);
+                    });
+                    _cell.addEventListener("mouseout",()=>{
+                        this.cellIsOut(gen, i, j);
+                    });
+                    _cell.addEventListener("click",()=>{
+                        this.cellIsClicked(gen, i, j);
+                    });
                     this.checkBordersAndEmptyCells({
                         element: _cell, 
                         cell: gen[i][j],

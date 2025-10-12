@@ -10,15 +10,11 @@
 class Cell{
     /**
      * Создание Ячейки с буквой слова (по горизонтали, вертикали, или пустотой)
-     * @param {row} позиция по вертикали 
-     * @param {col} позиция по горизонтали 
      * @param {val} значение ячейки - буква или 0
      * @param {horizontStart} оступ вправо (целое положительное) к началу слова
      * @param {verticalStart} оступ вверх (целое положительное) к началу слова
      */
-    constructor({row, col, val=0, horizontStart=-1, verticalStart=-1}){
-        this.row = row;
-        this.col = col;
+    constructor({val=0, horizontStart=-1, verticalStart=-1}){
         this.val = val;
         this.answer = "";
         //если horizontStart не -1, значит слово по горизонтали
