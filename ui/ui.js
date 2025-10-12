@@ -57,13 +57,38 @@ class CrossWordUI{
         console.log(askedWords);
         this.showQuestionAnswerPopup(askedWords);
     }
+
     showQuestionAnswerPopup(words){
         this._popupWindow.innerHTML = "";
         let _typingSuggestTextEl = document.createElement("div");
-        _typingSuggestTextEl.innerText = "Please, type your answer:";
+        _typingSuggestTextEl.innerText = "Please, type your answer.";
         this._popupWindow.append(_typingSuggestTextEl);
+        words.forEach(word=>{
+            let hint = document.createElement("p");
+            hint.innerText = "For "+ word.orientation + " word:";
+            let inputField = document.createElement("input");
+            inputField.setAttribute("id","pin");
+            inputField.setAttribute("placeholder",word.text.length + " signs");
+            inputField.setAttribute("maxlength",word.text.length);
+            inputField.setAttribute("size",word.text.length);
+            
+            this._popupWindow.append(hint,inputField);
+        });
+        let buttonsDiv = document.createElement("div");
+        let doneButton = document.createElement("button");
+        let cancelButton = document.createElement("button");
+        doneButton.innerText = "Ok";
+        cancelButton.innerText = "Cancel";
+        cancelButton.addEventListener("click",()=>{this.cancelQuestionAnswerPopup()});
+        buttonsDiv.append(doneButton,cancelButton);
+        this._popupWindow.append(buttonsDiv);
         this._popupWindow.classList.add("ui-popup-active");
     }
+    cancelQuestionAnswerPopup(){
+        alert(this._popupWindow)
+        this._popupWindow.classList.remove("ui-popup-active");
+    }
+
     render(){
         let _hintText = document.createElement("div");
         _hintText.classList.add("ui-cw-hint");

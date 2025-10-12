@@ -5,6 +5,7 @@
     height: 200px;
     margin: 30px;
     min-width: 300px;
+    padding: 10px;
     position: absolute;
     z-index:1000;
 }
