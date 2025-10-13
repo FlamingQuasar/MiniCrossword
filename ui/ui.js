@@ -75,7 +75,7 @@ class CrossWordUI{
             
             inputField.addEventListener("focusout",(el)=>{
                 let val = el.target.value;
-                let answer = {[word.orientation]:val};
+                let answer = {text:val, orientation:word.orientation};
                 answers[index]=answer;
             })
             this._popupWindow.append(hint,inputField);
@@ -84,18 +84,29 @@ class CrossWordUI{
         let doneButton = document.createElement("button");
         let cancelButton = document.createElement("button");
         doneButton.innerText = "Ok";
-        doneButton.addEventListener("click",()=>{this.saveQuestionAnswerPopup(answers)})
+        doneButton.addEventListener("click",()=>{this.saveQuestionAnswerPopup(answers,words)})
         cancelButton.innerText = "Cancel";
         cancelButton.addEventListener("click",()=>{this.cancelQuestionAnswerPopup()});
         buttonsDiv.append(doneButton,cancelButton);
         this._popupWindow.append(buttonsDiv);
         this._popupWindow.classList.add("ui-popup-active");
     }
-    saveQuestionAnswerPopup(answers){
-        console.log(answers);
+
+    saveQuestionAnswerPopup(answers,words){
+        words.forEach(word=>{
+            answers.forEach(answer =>{
+                if(answer.orientation == word.orientation){
+                    for(let i=0; i<word.cells.length; i++){
+                        if(answer.text[i]) 
+                            word.cells[i].el.innerText = answer.text[i];
+                    }
+                }
+            })
+        });
+        this._popupWindow.classList.remove("ui-popup-active");
     }
+
     cancelQuestionAnswerPopup(){
-        alert(this._popupWindow)
         this._popupWindow.classList.remove("ui-popup-active");
     }
 
