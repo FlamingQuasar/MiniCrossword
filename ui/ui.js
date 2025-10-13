@@ -148,7 +148,14 @@ class CrossWordUI{
                 }                
                 _matrixWrap.append(_row);
             }
-
+            let _controlButtonsDiv = document.createElement("div");
+            _controlButtonsDiv.classList.add("ui-cw-buttons");
+            let _checkButton = document.createElement("button");
+            let _solveButton = document.createElement("button");
+            _checkButton.innerText = "Check";
+            _solveButton.innerText = "Solve";
+            _controlButtonsDiv.append(_checkButton,_solveButton);
+            _matrixWrap.append(_controlButtonsDiv);
             _iteration.append(_matrixWrap, _questions);
             this._dom.append(_iteration);
             this.renderQuestions(gen, _questions);

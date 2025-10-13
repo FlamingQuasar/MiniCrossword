@@ -28,6 +28,14 @@
     margin-right: 10px;
     padding: 10px;
 }
+.ui-cw-buttons{
+    margin-top: 10px;
+    text-align: center;
+    vertical-align: bottom;
+}
+.ui-cw-buttons>button{
+    margin:4px;
+}
 .ui-cw-row{
     display:flex;
 }
