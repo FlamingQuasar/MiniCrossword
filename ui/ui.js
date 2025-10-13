@@ -63,7 +63,8 @@ class CrossWordUI{
         let _typingSuggestTextEl = document.createElement("div");
         _typingSuggestTextEl.innerText = "Please, type your answer.";
         this._popupWindow.append(_typingSuggestTextEl);
-        words.forEach(word=>{
+        let answers = [];
+        words.forEach((word,index)=>{
             let hint = document.createElement("p");
             hint.innerText = "For "+ word.orientation + " word:";
             let inputField = document.createElement("input");
@@ -72,17 +73,26 @@ class CrossWordUI{
             inputField.setAttribute("maxlength",word.text.length);
             inputField.setAttribute("size",word.text.length);
             
+            inputField.addEventListener("focusout",(el)=>{
+                let val = el.target.value;
+                let answer = {[word.orientation]:val};
+                answers[index]=answer;
+            })
             this._popupWindow.append(hint,inputField);
         });
         let buttonsDiv = document.createElement("div");
         let doneButton = document.createElement("button");
         let cancelButton = document.createElement("button");
         doneButton.innerText = "Ok";
+        doneButton.addEventListener("click",()=>{this.saveQuestionAnswerPopup(answers)})
         cancelButton.innerText = "Cancel";
         cancelButton.addEventListener("click",()=>{this.cancelQuestionAnswerPopup()});
         buttonsDiv.append(doneButton,cancelButton);
         this._popupWindow.append(buttonsDiv);
         this._popupWindow.classList.add("ui-popup-active");
+    }
+    saveQuestionAnswerPopup(answers){
+        console.log(answers);
     }
     cancelQuestionAnswerPopup(){
         alert(this._popupWindow)
