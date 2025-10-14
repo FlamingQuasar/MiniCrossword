@@ -46,6 +46,28 @@ class CrossWordUI{
             }
         });
     }
+
+    checkCrossword(gen){
+        gen.forEach(row=>{
+            row.forEach(cell=>{
+                if(cell.val != "0" && cell.val != cell.el.innerText)
+                    cell.el.classList.add("ui-cw-cell-error");
+            })
+        });
+    }
+
+    solveCrossword(gen){
+        console.log(gen);
+        gen.forEach(row=>{
+            row.forEach(cell=>{
+                if(cell.val != "0"){
+                    cell.el.innerText = cell.val;
+                    cell.el.classList.remove("ui-cw-cell-error");
+                }
+            })
+        });
+    }
+
     cellIsClicked(gen, row, col){
         let cell = gen[row][col];
         let askedWords = [];
@@ -97,8 +119,10 @@ class CrossWordUI{
             answers.forEach(answer =>{
                 if(answer.orientation == word.orientation){
                     for(let i=0; i<word.cells.length; i++){
-                        if(answer.text[i]) 
+                        if(answer.text[i]){
+                            word.cells[i].el.classList.remove("ui-cw-cell-error");
                             word.cells[i].el.innerText = answer.text[i];
+                        }
                     }
                 }
             })
@@ -145,7 +169,7 @@ class CrossWordUI{
                         bottomCell: i+1<gen.length ? gen[i+1][j] : null
                     });
                     _row.append(_cell);
-                }                
+                }
                 _matrixWrap.append(_row);
             }
             let _controlButtonsDiv = document.createElement("div");
@@ -153,7 +177,13 @@ class CrossWordUI{
             let _checkButton = document.createElement("button");
             let _solveButton = document.createElement("button");
             _checkButton.innerText = "Check";
+            _checkButton.addEventListener("click",()=>{
+                this.checkCrossword(gen);
+            });
             _solveButton.innerText = "Solve";
+            _solveButton.addEventListener("click",()=>{
+                this.solveCrossword(gen);
+            });
             _controlButtonsDiv.append(_checkButton,_solveButton);
             _matrixWrap.append(_controlButtonsDiv);
             _iteration.append(_matrixWrap, _questions);
@@ -176,7 +206,7 @@ class CrossWordUI{
             element.classList.add("ui-cw-cell-empty");
         }
         else{
-            element.innerText = cell.val;
+            element.innerHTML = "<b style='opacity:0'>_</b>";
             if(cell.verticalStart==0){
                 let _smallCount = document.createElement("p");
                 _smallCount.classList.add("ui-cw-cell-counter-vert");

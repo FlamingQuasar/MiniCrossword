@@ -46,6 +46,10 @@
     text-align: center;
     width:20px;
 }
+.ui-cw-cell-error{
+    background-color: lightcoral!important;
+    border-color: black!important;
+}
 .ui-cw-cell-empty{
     background-color:white;
     border:1px solid white;
