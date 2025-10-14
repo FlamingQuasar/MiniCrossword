@@ -1,10 +1,4 @@
-﻿
-//TODO:
-
-//предустановка генерации - открыть файл слов(+ слова по умолчанию, или + только короткие)
-
-
-class CrossWordUI{
+﻿class CrossWordUI{
     constructor({container, crossword}){
         this._dom = document.createElement("div");
         this._dom.classList.add("ui-crossword");
@@ -145,7 +139,9 @@ class CrossWordUI{
         let _generationOptions = document.createElement("div");
         _generationOptions.classList.add("ui-cw-options");
         let _optionsText = document.createElement("p");
-        _optionsText.innerText = "Setup crossword generator options:";
+        _optionsText.innerHTML = "Upload file with words,<br>Or use those: <br>"+this.crossword.words;
+        let _inputWordsFile = document.createElement("input");
+        _inputWordsFile.setAttribute("type","file");
 
         let _inputGenerationsNumberLabel =  document.createElement("label");
         let _inputGenerationsNumber = document.createElement("input");
@@ -178,7 +174,26 @@ class CrossWordUI{
         let _generateButton = document.createElement("button");
         _generateButton.innerText="Generate!";
         _generateButton.addEventListener("click",()=>{
-            const crossword = new Crossword({
+            const file = _inputWordsFile.files[0];
+            const reader = new FileReader();
+            reader.onload = (function () {
+                let wordsFromFile = reader.result.replace(/[\r\n]+/gm, ",").split(",");
+                const crossword = new Crossword({
+                    rows: _inputHeight.value, 
+                    cols: _inputWidth.value, 
+                    words: wordsFromFile, 
+                    empty: 5,
+                    genLimit: _inputGenerationsNumber.value,
+                    showLog: true
+                });
+                this.init(crossword);
+                this.render();
+            }).bind(this);
+            reader.onerror = function () {
+                console.error('Error reading the file');
+            };
+            if(file == undefined){
+                const crossword = new Crossword({
                 rows: _inputHeight.value, 
                 cols: _inputWidth.value, 
                 words: words, 
@@ -188,8 +203,11 @@ class CrossWordUI{
             });
             this.init(crossword);
             this.render();
+            } else {
+                reader.readAsText(file, 'utf-8');
+            }            
         });
-        _generationOptions.append(_optionsText,_inputGenerationsNumberLabel,_inputWidthLabel,_inputHeightLabel,_generateButton);
+        _generationOptions.append(_optionsText,_inputWordsFile,_inputGenerationsNumberLabel,_inputWidthLabel,_inputHeightLabel,_generateButton);
        
         let _hintText = document.createElement("div");
         _hintText.classList.add("ui-cw-hint");
@@ -320,11 +338,4 @@ class CrossWordUI{
         }
     }
 
-    inputAnswer(){
-
-    }
-
-    checkAnswers(){
-
-    }
 }
