@@ -74,6 +74,15 @@
 .ui-cw-cell-counter-hor{
     margin-top: -10px;
 }
+.ui-cw-options{
+    background-color: aquamarine;
+    border-bottom: 2px solid dashed;
+    padding: 10px;
+}
+.ui-cw-options label{
+    display: block;
+    width: 400px;
+}
 .ui-cw-questions{
     display: flex;
 }

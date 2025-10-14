@@ -1,31 +1,27 @@
 ﻿
 //TODO:
-//Клик по ячейкам - форма ввода слова
-//кнопочка проверки у каждого кроссворда, работает на 3 попытки, верные окрашивает зеленой рамкой 
-//кнопка завершения у каждого кроссворда
 
-//предустановка генерации - открыть файл слов(+ слова по умолчанию, или + только короткие), 
-// ширина, высота, минимум пробелов
-//доработать принудительные пробелы 
+//предустановка генерации - открыть файл слов(+ слова по умолчанию, или + только короткие)
 
 
 class CrossWordUI{
     constructor({container, crossword}){
-        this.crossword = crossword;
         this._dom = document.createElement("div");
         this._dom.classList.add("ui-crossword");
         this._popupWindow = document.createElement("div");
         this._popupWindow.classList.add("ui-popup");
-        this._dom.append(this._popupWindow);
         container.append(this._dom);
-        this.verticalCounter = 1;
-        this.horizontalCounter = 1;
-        this.init();
+        
+        this.init(crossword);
     }
 
-    init(){
+    init(crossword){
+        this.crossword = crossword;
+        this.verticalCounter = 1;
+        this.horizontalCounter = 1;
         this.crossword.startGeneration();
     }
+
     cellIsHovered(gen, row, col){
         let cell = gen[row][col];
         gen.usedWords.forEach(word => {
@@ -36,6 +32,7 @@ class CrossWordUI{
             }
         });
     }
+
     cellIsOut(gen, row, col){
         let cell = gen[row][col];
         gen.usedWords.forEach(word => {
@@ -57,7 +54,8 @@ class CrossWordUI{
     }
 
     solveCrossword(gen){
-        console.log(gen);
+        this.verticalCounter = 1;
+        this.horizontalCounter = 1;
         gen.forEach(row=>{
             row.forEach(cell=>{
                 if(cell.val != "0"){
@@ -128,7 +126,7 @@ class CrossWordUI{
                         if(answer.text[i]){
                             word.cells[i].el.classList.remove("ui-cw-cell-error");
                             word.cells[i].el.innerText = answer.text[i];
-                            this.elementAddWordIndexesIfNeeded(word.cells[i].el, word.cells[i]);
+                            //this.elementAddWordIndexesIfNeeded(word.cells[i].el, word.cells[i]);
                         }
                     }
                 }
@@ -142,10 +140,61 @@ class CrossWordUI{
     }
 
     render(){
+        this._dom.innerHTML = "";
+        this._dom.append(this._popupWindow);
+        let _generationOptions = document.createElement("div");
+        _generationOptions.classList.add("ui-cw-options");
+        let _optionsText = document.createElement("p");
+        _optionsText.innerText = "Setup crossword generator options:";
+
+        let _inputGenerationsNumberLabel =  document.createElement("label");
+        let _inputGenerationsNumber = document.createElement("input");
+        _inputGenerationsNumber.setAttribute("type","number");
+        _inputGenerationsNumber.setAttribute("placeholder","Number");
+        _inputGenerationsNumber.setAttribute("value","4");
+        _inputGenerationsNumber.setAttribute("min",1);
+        _inputGenerationsNumberLabel.append(_inputGenerationsNumber);
+        _inputGenerationsNumberLabel.innerHTML+=" Number of crosswords";
+
+        let _inputWidthLabel =  document.createElement("label");
+        let _inputWidth = document.createElement("input");
+        _inputWidth.setAttribute("type","number");
+        _inputWidth.setAttribute("placeholder","Number");
+        _inputWidth.setAttribute("value","6");
+        _inputWidth.setAttribute("min",3);
+        _inputWidthLabel.append(_inputWidth);
+        _inputWidthLabel.innerHTML+=" Width";
+
+        let _inputHeightLabel =  document.createElement("label");
+        let _inputHeight = document.createElement("input");
+        _inputHeight.setAttribute("type","number");
+        _inputHeight.setAttribute("placeholder","Number");
+        _inputHeight.setAttribute("value","5");
+        _inputHeight.setAttribute("min",3);
+        _inputHeightLabel.append(_inputHeight);
+        _inputHeightLabel.innerHTML+=" Height";
+        let words = ["cat", "cop", "top", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom", "old", "odd", "don", "node"];
+            
+        let _generateButton = document.createElement("button");
+        _generateButton.innerText="Generate!";
+        _generateButton.addEventListener("click",()=>{
+            const crossword = new Crossword({
+                rows: _inputHeight.value, 
+                cols: _inputWidth.value, 
+                words: words, 
+                empty: 5,
+                genLimit: _inputGenerationsNumber.value,
+                showLog: true
+            });
+            this.init(crossword);
+            this.render();
+        });
+        _generationOptions.append(_optionsText,_inputGenerationsNumberLabel,_inputWidthLabel,_inputHeightLabel,_generateButton);
+       
         let _hintText = document.createElement("div");
         _hintText.classList.add("ui-cw-hint");
-        _hintText.innerHTML = `Click to the word to type it! Or click <b>"Show"</b> button`;
-        this._dom.append(_hintText);
+        _hintText.innerHTML = `Click to the word to type it, then "Check"! Or click <b>"Solve"</b> button`;
+        this._dom.append(_generationOptions,_hintText);
         this.crossword.generations.forEach(gen => {
             let _iteration = document.createElement("div"),
                 _matrixWrap = document.createElement("div"),
