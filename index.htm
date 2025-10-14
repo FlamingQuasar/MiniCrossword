@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="js/main.js"></script>
+        <script src="ui/ui.js"></script>
+        <link rel="stylesheet" href="ui/style.css"/>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script>
+            let words = ["cat", "cop", "top", "bar", "bra", "crab", "art", "bat", "rat", "hat", "mat", "cap", "med", "mad", "dad", "mom", "old", "odd", "don", "node"];
+            const crossword = new Crossword({
+                rows: 8, 
+                cols: 8, 
+                words: words, 
+                empty: 5,
+                genLimit: 5,
+                showLog: true
+            });
+            const app = new CrossWordUI({
+                container : document.querySelector("#app"),
+                crossword : crossword
+            });
+            app.render();
+        </script>
+    </body>
+</html>
