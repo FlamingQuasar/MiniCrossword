@@ -63,6 +63,7 @@ class CrossWordUI{
                 if(cell.val != "0"){
                     cell.el.innerText = cell.val;
                     cell.el.classList.remove("ui-cw-cell-error");
+                    this.elementAddWordIndexesIfNeeded(cell.el, cell);
                 }
             })
         });
@@ -94,6 +95,11 @@ class CrossWordUI{
             inputField.setAttribute("placeholder",word.text.length + " signs");
             inputField.setAttribute("maxlength",word.text.length);
             inputField.setAttribute("size",word.text.length);
+            word.cells.forEach(cell=>{
+                if(cell.el.innerText != "_" && cell.el.innerText.length==1){
+                    inputField.value+=cell.el.innerText;
+                }
+            })
             
             inputField.addEventListener("focusout",(el)=>{
                 let val = el.target.value;
@@ -122,6 +128,7 @@ class CrossWordUI{
                         if(answer.text[i]){
                             word.cells[i].el.classList.remove("ui-cw-cell-error");
                             word.cells[i].el.innerText = answer.text[i];
+                            this.elementAddWordIndexesIfNeeded(word.cells[i].el, word.cells[i]);
                         }
                     }
                 }
@@ -207,20 +214,8 @@ class CrossWordUI{
         }
         else{
             element.innerHTML = "<b style='opacity:0'>_</b>";
-            if(cell.verticalStart==0){
-                let _smallCount = document.createElement("p");
-                _smallCount.classList.add("ui-cw-cell-counter-vert");
-                _smallCount.innerText = this.verticalCounter;
-                element.append(_smallCount);
-                this.verticalCounter++;
-            }
-            if(cell.horizontStart==0){
-                let _smallCount = document.createElement("p");
-                _smallCount.classList.add("ui-cw-cell-counter-hor");
-                _smallCount.innerText = this.horizontalCounter;
-                element.append(_smallCount);
-                this.horizontalCounter++;
-            }
+            this.elementAddWordIndexesIfNeeded(element, cell);
+           
             if(cell.verticalStart>=0 && cell.horizontStart>=0){
                 element.style.border = "1px dashed grey";
             }
@@ -232,6 +227,23 @@ class CrossWordUI{
                 element.style.borderLeft = "1px solid grey";            
             if(!rightCell || (rightCell.horizontStart == 0 || rightCell.horizontStart != cell.horizontStart+1))
                 element.style.borderRight = "1px solid grey";
+        }
+    }
+
+    elementAddWordIndexesIfNeeded(element,cell){
+        if(cell.verticalStart==0){
+            let _smallCount = document.createElement("p");
+            _smallCount.classList.add("ui-cw-cell-counter-vert");
+            _smallCount.innerText = this.verticalCounter;
+            element.append(_smallCount);
+            this.verticalCounter++;
+        }
+        if(cell.horizontStart==0){
+            let _smallCount = document.createElement("p");
+            _smallCount.classList.add("ui-cw-cell-counter-hor");
+            _smallCount.innerText = this.horizontalCounter;
+            element.append(_smallCount);
+            this.horizontalCounter++;
         }
     }
 
